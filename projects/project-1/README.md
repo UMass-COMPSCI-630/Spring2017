@@ -68,8 +68,11 @@ that everything works in the presence of multiple threads.
 You will only be modifying a single file, `statsalloc.cpp`. You need to
 implement every method in that class.
 
-You can trivially test your code by linking with the generated library. The
-existing `Makefile` is for Mac platforms. (Linux support is forthcoming.)
+You can trivially test your code by linking with the generated library; the
+program `testme` is produced by the `Makefile`. You may need to set the
+environment variable `LD_LIBRARY_PATH` as follows:
+
+`export LD_LIBRARY_PATH=.`
 
 To *really* test your code, replace the memory allocator in a real application
 (if it crashes, you probably have a bug). This is straightforward to do on both
