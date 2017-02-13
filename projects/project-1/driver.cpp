@@ -46,38 +46,3 @@ extern "C" {
   void xxmalloc_unlock() {
   }
 }
-
-#if 0
-int
-main()
-{
-#if 1
-  HeapType heapo;
-#if 0
-  for (int i = 0; i < 65536 * 4; i++) {
-    auto cl = heapo.getSizeClass(i);
-    cout << i << ": " << cl << ", " << heapo.getSizeFromClass(cl) << endl;
-  }
-#endif
-  for (int i = 0; i < 10; i++) {
-    void * ptr = heapo.malloc(1);
-  }
-  for (int i = 0; i < 10; i++) {
-    void * ptr = heapo.malloc(1);
-    cout << ptr << endl;
-    heapo.free(ptr);
-  }
-  void * ptr = heapo.malloc(4);
-  size_t req = 0;
-  heapo.walk([&](HeapType::Header * h){ req += h->requestedSize; });
-  cout << req << endl;
-  cout << heapo.bytesRequested() << endl;
-  size_t alloc = 0;
-  heapo.walk([&](HeapType::Header * h){ alloc += h->allocatedSize; });
-  cout << alloc << endl;
-  cout << heapo.bytesAllocated() << endl;
-  cout << heapo.maxBytesAllocated() << endl;
-#endif
-  return 0;
-}
-#endif
