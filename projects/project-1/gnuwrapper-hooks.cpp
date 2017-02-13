@@ -20,8 +20,6 @@
 #include <new>
 #include <pthread.h>
 
-#include "heaplayers.h"
-
 /*
   To use this library,
   you only need to define the following allocation functions:

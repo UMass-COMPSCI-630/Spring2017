@@ -2,6 +2,7 @@
 #define STATSALLOC_H
 
 #include <cassert>
+#include <functional>
 #include <cstdlib>
 #include <cmath>
 #include <iostream>
