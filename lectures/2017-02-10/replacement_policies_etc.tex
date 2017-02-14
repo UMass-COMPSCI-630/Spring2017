@@ -130,7 +130,7 @@ immediately follow.
 \subsection{Locality}
 \textbf{Temporal Locality} refers to the reuse of specific data within a
 small window of time. In other words, data has high temporal locality if when it
-ccessed, it is likely to be accessed again soon.
+is accessed, it is likely to be accessed again soon.
 
 \textbf{Spacial Locality} refers to the use of data within relatively close
 storage locations from each other.
@@ -140,6 +140,9 @@ due to caches by hiding the latency of memory accesses by keeping things often
 or likely to be used in low-latency caches. Memory that exhibits low locality
 leads to cache misses on memory accesses, incurring overhead and degredating
 performance of caches.
+
+Ways to lower cache "miss" rate include maintaining good spatial/temportal
+locality, or to use bigger caches.
 
 \section{Cache Replacement Policies}
 
@@ -162,21 +165,27 @@ MRU caches evict the newest cache entry. This seems counterintuitive, and is
 rarely used in systems.
 
 \subsection{RAND - Random}
-RAND caches nondeterministically evict a random entry on cache misses. It can be
-shown that RAND and LRU converge in the worst-case. RAND is actually desirable
-in some scenarios, such as when many entries are reused often, and a small
-number have recently but infrequently been used.
+RAND caches nondeterministically evict a random entry on cache misses. It
+maintains no state information or counter. It can be shown that RAND and LRU
+converge in the worst-case. RAND is actually desirable in some scenarios, such
+as when many entries are reused often, and a small number have recently but
+infrequently been used. A common and popular example is its usage in ARM
+architecture.
 
 \subsection{OPT - Optimal Behavior}
-OPT needs to know the future, but provides the optimal cache hit rate for a
-given trace of memory accesses. The process is to:
+OPT is the "perfect cache algorithm", and needs to know the future, but provides
+the optimal cache hit rate for a given trace of memory accesses. The process is
+to:
 \begin{itemize}
     \item Run the program once to collect a trace of accesses.
     \item Traverse the trace in reverse and evict the entry which has not been
         used in the longest amount of time.
 \end{itemize}
 OPT is impractical for general use, but is useful as the ideal baseline for
-comparing all other cache replacement algorithms.
+comparing all other cache replacement algorithms. More specifically:
+
+A real cache algorithm (i.e, other than OPT), can do no better than K * OPT,
+where K is the number of the cache elements.
 
 \subsection{Implementation}
 
@@ -189,6 +198,8 @@ address of objects. Each \emph{set} is divided into some number of \emph{ways},
 which are treated as ages or generations using a small number of bits to
 approximate age. To choose an entry to evict, one computes the hash of the new
 entry to determine the set, and evicts any entry in the oldest age (i.e. way).
+Examples include 1-way, 4-way, 8-way, etc., with 8-way being most commonly used
+among these.
 
 Performance depends on the quality of hash function. Evictions that are caused
 because two entries map to the same hash are called \textbf{conflict misses}.
@@ -206,7 +217,7 @@ The TLB is a unique fully associative cache on CPUs. It stores the mapping of
 virtual to physical addresses in what is called a \textbf{page table}. Pages are
 typically 4K chunks rather than cache line sized. Because paging must be high
 performance and the TLB implements strict LRU, the TLB size is typically small,
-limited to 256 or 512 entries.
+limited to 256 or 512 entries, very fast and accurate.
 
 \section{Instruction Set Architectures (ISAs)}
 
