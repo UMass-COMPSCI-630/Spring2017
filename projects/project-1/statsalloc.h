@@ -7,6 +7,7 @@
 #include <cmath>
 #include <iostream>
 #include <new>
+#include <mutex>
 #include <sys/mman.h>
 
 using namespace std;
@@ -68,6 +69,7 @@ public:
 
 private:
 
+  recursive_mutex heapLock;
   static const auto Threshold = 16384;
   static const auto Base = 16;
   size_t allocated;
