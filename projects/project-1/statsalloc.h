@@ -44,22 +44,22 @@ public:
   
   void * malloc(size_t sz);
   void free(void * ptr);
-  size_t getSize(void * p) const;
+  size_t getSize(void * p);
 
   // number of bytes currently allocated  
-  size_t bytesAllocated() const;
+  size_t bytesAllocated();
   
   // max number of bytes allocated  
-  size_t maxBytesAllocated() const;
+  size_t maxBytesAllocated();
 
   // number of bytes *requested*
   // (e.g., malloc(4) might result in an allocation of 8; 4 = bytes requested, 8 = bytes allocated)
-  size_t bytesRequested() const;
+  size_t bytesRequested();
   
   // max number of bytes *requested*
-  size_t maxBytesRequested() const;
+  size_t maxBytesRequested();
 
-  void walk(const std::function< void(Header *) >& f) const;
+  void walk(const std::function< void(Header *) >& f); 
 
   // Return maximum size of object for a given size class.
   static size_t getSizeFromClass(int index);
