@@ -1,0 +1,169 @@
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+\usepackage{graphicx}
+\usepackage{url}
+
+%
+% The following commands sets up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+\newcommand{\dnl}{\mbox{}\par}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+  \pagestyle{myheadings}
+  \thispagestyle{plain}
+  \newpage
+  \setcounter{lecnum}{#1}
+  \setcounter{page}{1}
+  \noindent
+  \begin{center}
+  \framebox{
+     \vbox{\vspace{2mm}
+   \hbox to 6.28in { {\bf CMPSCI~630~~~ Systems
+                       \hfill Spring 2017} }
+      \vspace{4mm}
+      \hbox to 6.28in { {\Large \hfill Lecture #1  \hfill} }
+%       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+      \vspace{2mm}
+      \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+     \vspace{2mm}}
+  }
+  \end{center}
+  \markboth{Lecture #1: #2}{Lecture #1: #2}
+  \vspace*{4mm}
+}
+
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+%
+\renewcommand{\cite}[1]{[#1]}
+
+% \input{epsf}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{FIGURE-SIZE}{CAPTION}{FILENAME}
+\newcommand{\fig}[4]{
+           \vspace{0.2 in}
+           \setlength{\epsfxsize}{#2}
+           \centerline{\epsfbox{#4}}
+           \begin{center}
+           Figure \thelecnum.#1:~#3
+           \end{center}
+   }
+
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% Some useful equation alignment commands, borrowed from TeX
+\makeatletter
+\def\eqalign#1{\,\vcenter{\openup\jot\m@th
+ \ialign{\strut\hfil$\displaystyle{##}$&$\displaystyle{{}##}$\hfil
+     \crcr#1\crcr}}\,}
+\def\eqalignno#1{\displ@y \tabskip\@centering
+ \halign to\displaywidth{\hfil$\displaystyle{##}$\tabskip\z@skip
+   &$\displaystyle{{}##}$\hfil\tabskip\@centering
+   &\llap{$##$}\tabskip\z@skip\crcr
+   #1\crcr}}
+\def\leqalignno#1{\displ@y \tabskip\@centering
+ \halign to\displaywidth{\hfil$\displaystyle{##}$\tabskip\z@skip
+   &$\displaystyle{{}##}$\hfil\tabskip\@centering
+   &\kern-\displaywidth\rlap{$##$}\tabskip\displaywidth\crcr
+   #1\crcr}}
+\makeatother
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+
+
+% Some general latex examples and examples making use of the
+% macros follow.
+
+\begin{document}
+
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{7}{February 13}{Emery Berger}{Abram Handler,Daniel Sam Pete Thiyagu}
+
+\section*{RISC v. CISC (continued)}
+
+One of the main arguments for RISC was that RISC is easy for compiler writers and easy for computer architect designers. However, there are very few compiler writers and designers and many billions of users. We can alleviate the problem of difficult code writing for compiler writers or difficult chip design by simply paying more money for skilled workers. Ultimately, the needs of users are much, much more important.
+
+Moreover, the assumptions behind the RISC vs. CISC debate have changed. Currently we have two architectures - INTEL and ARM. Prior to that we had a proliferation of architectures like Motorola chips, MIPS and many more. So some of the worry about supporting varying, heterogeneous CISC is less relevant today.
+
+Some assorted notes: 
+\begin{itemize}
+    \item Intel embedded a compiler onto their chip, which translates CISC to RISC. So recent Intel processors are ``CISC outside, RISC inside''.
+    \item The x86 architecture is compatible with a many applications.
+    \item Itanium (sometimes called ``itanic'') was a failure at Intel which utilized RISC. It had no speculation and access to cache was unpredictable. It used Explicitly Parallel Instruction Computing (EPIC) and had giant instructions of same size. These giant instructions are called bundle. A bundle consists of 3 instructions. All code in same bundle can be run independently in parallel. It can also be fetched together in a batch. This is very similar to VLIW, which was also developed to alleviate the problem of non-parallelism, but which also did not turn out to be a success.
+    \item For increased parallelism, chips try to check for dependencies and, if none are found, they run instructions in parallel. Tomasulo's algorithm is an algorithm that helps detects dependencies. Modern chips also employ speculation (next section).
+\end{itemize}
+
+\section*{Branch prediction}
+Branch prediction tries to decide what branch should in a code will be taken so things can be computed ahead of time. However, chip designers need to keep track of speculative operations with a speculative bit, because some of the speculative calculations could be wrong or not necessary.
+
+Speculation is expensive (i.e. power or clock cycles), so incorrect speculation or misses should be really low. Current branch predictors now have an accuracy of around 99\%. Daniel Jimenez found a way to approximate the classic perceptron algorithm in one clock cycle. Any algorithm that does prediction needs to be very fast.
+
+
+\textbf{Static Branch Predictors}
+Static predictors decide what to predict without any dynamic, run time information from the code. Examples might be code that always accepts or always declines to take a conditional branch.
+
+\textbf{Dynamic Branch Predictors}
+Another option is to use dynamic prediction, such as keeping a count of how many times a particular branch was taken. The number of bits stored for the count should be low. Sometimes the bit counts are ``saturating counters''.
+
+\section*{Moore's law, power and multi-core}
+
+Moore's law was in effect until about 2005. But around this time, chip makers started having power problems. Adding more transistors was not the problem, but power was. Power and heat grows quadratically as gates are added to a chip. But gates grow linearly in log space. 
+So if we keep adding chips at the current rate, at a certain point our computers will be as hot as the sun, which is a problem for mobile devices.
+
+The distance between gates is ``feature size.'' People have speculated about limits to feature size, but then these limits are broken. As density of gates increases, the distance between them decreases and they can send quicker signals to each other. Dennard scaling concerns the performance per unit of power as density increases.
+
+Chips need to be cool. So one idea for multicore chips: if there are hotspots, move the processing to another core or another part of the chip. One problem with this is, what happends when processing uses all cores?
+
+Multicore machines work better in some settings (webserver) than others (mobile devices for personal use).
+
+\section{Notes about parallel processors}
+Vector Processor: executes a single operation on lots of data (vectors). This is called ``SIMD'', Single Instruction Multiple Data. Vectorizing operations makes them much faster than executing the same operation many times, component by component. If you do multiple instructions in parallel on lots of data it is called ``MIMD'', Multiple Instruction Multiple Data.
+
+Other notes: How do you expose parallelism? Dynamically discover dependencies and use compiler independent optimizations.
+
+\section*{Mesa Monitors}
+
+A monitor is a procedure which handles concurrent access to shared data. The Mesa language went away. But Mesa monitors were ported into Java: in Java, each object has a monitor with a recursive lock which can be acquired multiple times.
+
+Other notes:
+
+\begin{enumerate}
+    \item Java objects each have a counter, a thread id, and a condition variable. 
+    \item Sometimes, the object header is often bigger than the object itself
+    \item You don't necessarily need all of this information for each object. So David Bacon introduced ``thin locks,'' which are basically just bits. Each time you use the object, you get the bit (lock). This optimization, called a ``Bacon bit'', saves space.
+\end{enumerate}
+
+\end{document}
+
