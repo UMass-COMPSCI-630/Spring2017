@@ -1,0 +1,160 @@
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+\usepackage{graphicx}
+\usepackage{url}
+
+%
+% The following commands sets up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+\newcommand{\dnl}{\mbox{}\par}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+  \pagestyle{myheadings}
+  \thispagestyle{plain}
+  \newpage
+  \setcounter{lecnum}{#1}
+  \setcounter{page}{1}
+  \noindent
+  \begin{center}
+  \framebox{
+     \vbox{\vspace{2mm}
+   \hbox to 6.28in { {\bf COMPSCI~630~~~Systems
+                       \hfill Spring 2017} }
+      \vspace{4mm}
+      \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+      \vspace{2mm}
+      \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe(s): #4} }
+     \vspace{2mm}}
+  }
+  \end{center}
+  \markboth{Lecture {#1}: #2}{Lecture {#1}: #2}
+  \vspace*{4mm}
+}
+
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+%
+\renewcommand{\cite}[1]{[#1]}
+
+% \input{epsf}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{FIGURE-SIZE}{CAPTION}{FILENAME}
+\newcommand{\fig}[4]{
+           \vspace{0.2 in}
+           \setlength{\epsfxsize}{#2}
+           \centerline{\epsfbox{#4}}
+           \begin{center}
+           Figure \thelecnum.#1:~#3
+           \end{center}
+   }
+
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% Some useful equation alignment commands, borrowed from TeX
+\makeatletter
+\def\eqalign#1{\,\vcenter{\openup\jot\m@th
+ \ialign{\strut\hfil$\displaystyle{##}$&$\displaystyle{{}##}$\hfil
+     \crcr#1\crcr}}\,}
+\def\eqalignno#1{\displ@y \tabskip\@centering
+ \halign to\displaywidth{\hfil$\displaystyle{##}$\tabskip\z@skip
+   &$\displaystyle{{}##}$\hfil\tabskip\@centering
+   &\llap{$##$}\tabskip\z@skip\crcr
+   #1\crcr}}
+\def\leqalignno#1{\displ@y \tabskip\@centering
+ \halign to\displaywidth{\hfil$\displaystyle{##}$\tabskip\z@skip
+   &$\displaystyle{{}##}$\hfil\tabskip\@centering
+   &\kern-\displaywidth\rlap{$##$}\tabskip\displaywidth\crcr
+   #1\crcr}}
+\makeatother
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+
+
+% Some general latex examples and examples making use of the
+% macros follow.
+
+\begin{document}
+
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{8}{Memory Allocation}{Emery Berger}{Rahul Handa,Peter Jay}
+
+\section{Discussion about Determinism and Non Determinism}
+
+We start by continuing our discussion about DThreads from the paper reviewed last week. (At this point prof.Berger found an innovative use for the old speakers).
+We discussed what exactly is meant by determinism, the idea that a program repeatedly run with the same inputs will produce the same results. This is in contrast to non-determinism which produces different results on subsequent executions. Sources of non-determinism include hardware conditions and variations in input such as GUI events.
+
+\subsection{Threads}
+Threads and thread scheduling are another source of non determinism.
+(insert the single and multicore thread diagram here, if we want to).
+A sub discussion lead to the two kinds of bugs that a program faces :
+\begin{itemize}
+\item HeisenBug (non-deterministic) - A bug that may or may not surface with every execution; these are harder to debug but users like them because they may ?go away?.
+\item Bohr Bug (deterministic) - A bug that occurs with every execution; programmers like these bugs because they are easy to debug however users hate them because they do not resolve themselves.
+\end{itemize}
+
+\subsection{Single core v/s Multi Core}
+The execution of threads on both architectures, Single core is a nice world where execution of threads is kind of deterministic and threads are interrupted only by quantum expiration or explicit yield where as in a multicore environment thread scheduling faces problems like interruption by other cores/self, cache(Different addresses for every core) and which thread reaches the required resource first.
+
+\section{Mutex and Race example}
+We study a couple of programs to understand how race condition affects determinism and how we can use locks(mutual execution) to counter that.
+\begin{verbatim}
+Const int c =1000;
+Int x[c] ;
+//multiple threads
+for (i=0;i<1000000;i++){
+      for(j=0;j<1000;j++){
+x[j]++; 	}
+}
+\end{verbatim}
+We never get the same result twice in C++ for this program.
+Hence locks are used to make such a program deterministic. Use something like :
+\begin{verbatim}
+ptmutex.acquire();
+ for(j=0;j<1000;j++){
+x[j]++; 	}
+}
+ptmutex.release();
+\end{verbatim}
+This executes one thread at a time.But another issue brought up by this approach is the semantic impact , i.e., output depends on which lock acquires the lock first.
+Monitors and semaphores are used to deal with this. (Professor uses the dirty banking transaction example to explain this , which he very much hates.)
+
+\section{Detecting a Race}
+There are static and dynamic race detectors , major difference is the former being at compile time while latter is at runtime and it causes 10x-400x slowdown of a program.A controversial question come up: \textbf{Do race conditions come under bugs?}
+
+\section{How DThreads enforce determinism?}
+Dthreads are used to force execution to behave in a deterministic way. It works by partitioning all threads into separate process with individual memory spaces. Normally threads share memory but dthreads operate in parallel and make memory access to their own private memory set. Eventually there is a synchronization phase where all dthreads update the main memory in a deterministic way. This eliminates non-deterministic output but may be costly as it trades space for predictability. Dthreads also eliminates false sharing which is when multiples thread wish to access variables that unfortunately share the same cache line. Once a thread gets a hold of one of the variables the CPU invalidates updates made to the other variables which can result in a massive performance decrease. Dthreads solve this issue because they operate in private address spaces.
+
+
+\end{document}
