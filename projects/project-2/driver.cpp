@@ -1,6 +1,8 @@
 #include "gcmalloc.hh"
 #include "mmapheap.h"
 
+#include "gcmalloc.cpp"
+
 const auto HeapSize = 1024UL * 1024 * 1024;
 class HeapType : public GCMalloc<MmapHeap<HeapSize>> {};
 
