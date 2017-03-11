@@ -9,7 +9,13 @@
 #include <new>
 #include <mutex>
 
+#if defined(__APPLE__)
+#include <mach-o/getsect.h>
+#endif
+
 using namespace std;
+
+extern void * GCMallocGlobal;
 
 class Header {
 public:
@@ -92,7 +98,18 @@ private:
   // Return the start and end of the globals.
   void getGlobals(void *& start, void *& end) {
     // currently a NOP.
-    start = end;
+#if defined(__APPLE__)
+    // Note this is actually deprecated.
+    start = (void *) get_etext();
+    end   = (void *) get_end();
+    if ((uintptr_t) &GCMallocGlobal < (uintptr_t) start) {
+      start = &GCMallocGlobal;
+    } else if ((uintptr_t) &GCMallocGlobal > (uintptr_t) end) {
+      end = &GCMallocGlobal;
+    }
+#else
+    start = end = 0;
+#endif
   }
 
   // Scan through this region of memory looking for pointers to mark.
@@ -146,6 +163,9 @@ private:
   // We maintain exact size classes (multiples of Base) until this threshold.
   static const auto Threshold = 16384;
 
+  // Number of objects allocated to date.
+  size_t objectsAllocated;
+  
   // The amount of memory currently allocated.
   size_t allocated;
 
