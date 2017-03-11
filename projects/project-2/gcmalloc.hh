@@ -13,6 +13,16 @@
 #include <mach-o/getsect.h>
 #endif
 
+extern "C" {
+#if !defined(__APPLE__)
+  extern int __data_start;
+  extern int _end;
+  
+  extern char _etext;
+  extern char _edata;
+#endif
+}
+
 using namespace std;
 
 extern void * GCMallocGlobal;
@@ -108,7 +118,8 @@ private:
       end = &GCMallocGlobal;
     }
 #else
-    start = end = 0;
+    start = (void *) &__data_start;
+    end   = (void *) &_end;
 #endif
   }
 
