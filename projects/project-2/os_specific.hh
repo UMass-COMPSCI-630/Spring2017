@@ -12,14 +12,19 @@
 #include <mach-o/getsect.h>
 #endif
 
+#   pragma weak __data_start
+#   pragma weak data_start
+
 extern "C" {
 #if !defined(__APPLE__)
-  extern int __data_start;
   extern int _end[];
   extern char **__environ;
   
-  extern char _etext;
-  extern char _edata;
+  extern char etext;
+  extern char edata;
+  extern char end;
+
+  extern int __data_start[], data_start[];
 #endif
 }
 
@@ -43,8 +48,8 @@ public:
       end = &GCMallocGlobal;
     }
 #else
-    start = (void *) &__data_start;
-    end   = (void *) (uintptr_t) _end;
+    start = (void *) __data_start;
+    end = (void *) _end;
 #endif
     if (start > end) {
       auto tmp = start;
@@ -55,6 +60,25 @@ public:
    
   static void getStack(void *& start, void *& end) {
 #if !defined(__APPLE__)
+    unsigned long kstkesp, startstack;
+    readStat(kstkesp, startstack);
+    start = (void *) kstkesp;
+    end   = (void *) startstack;
+    tprintf("stack: start=@, end=@\n", (size_t) start, (size_t) end);
+#else
+    static pthread_t self = pthread_self();
+    auto addr = pthread_get_stackaddr_np(self);
+    auto size = pthread_get_stacksize_np(self);
+    // Assumes stack grows down.
+    start = (void *) ((uintptr_t) addr - size);
+    end = addr;
+#endif
+  }
+
+private:
+
+  static void readStat(unsigned long& kstkesp, unsigned long& startstack)
+  {
     int fd = open("/proc/self/stat", O_RDONLY);
     char buf[4096];
     size_t sz = read(fd, buf, 4096);
@@ -73,7 +97,10 @@ public:
     unsigned long long starttime;
     unsigned long vsize;
     long rss;
-    unsigned long rsslim, startcode, endcode, startstack, kstkesp, kstkeip, signal, blocked, sigignore, sigcatch, wchan, nswap, cnswap;
+    unsigned long rsslim, startcode, endcode;
+    /*    unsigned long startstack; */
+    /*    unsigned long kstkesp; */
+    unsigned long kstkeip, signal, blocked, sigignore, sigcatch, wchan, nswap, cnswap;
     int exit_signal, processor;
     unsigned int rt_priority, policy;
     unsigned long long delayacct_blkio_ticks;
@@ -134,18 +161,7 @@ public:
 	   &env_start,
 	   &env_end,
 	   &exit_code);
-    start = (void *) kstkeip;
-    end   = (void *) startstack;
-#else
-    static pthread_t self = pthread_self();
-    auto addr = pthread_get_stackaddr_np(self);
-    auto size = pthread_get_stacksize_np(self);
-    // Assumes stack grows down.
-    start = (void *) ((uintptr_t) addr - size);
-    end = addr;
-#endif
   }
-  
 };
 
 #endif
