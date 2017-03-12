@@ -36,8 +36,8 @@ public:
   static void getGlobals(void *& start, void *& end) {
 #if defined(__APPLE__)
     // NOP for now.
-    start = end = 0;
-    return;
+    //    start = end = 0;
+    //return;
     
     // Note this is actually deprecated.
     start = (void *) get_etext();
@@ -62,6 +62,8 @@ public:
       start = end;
       end = tmp;
     }
+    start = (void *) (((uintptr_t) start + 7) & ~7);
+    //    tprintf("GLOBALS: start=@, end=@\n", (size_t) start, (size_t) end);
   }
    
   static void getStack(void *& start, void *& end) {
@@ -70,7 +72,6 @@ public:
     readStat(kstkesp, startstack);
     start = (void *) kstkesp;
     end   = (void *) startstack;
-    tprintf("stack: start=@, end=@\n", (size_t) start, (size_t) end);
 #else
     static pthread_t self = pthread_self();
     auto addr = pthread_get_stackaddr_np(self);
@@ -79,6 +80,8 @@ public:
     start = (void *) ((uintptr_t) addr - size);
     end = addr;
 #endif
+    start = (void *) (((uintptr_t) start + 7) & ~7);
+    //    tprintf("stack: start=@, end=@\n", (size_t) start, (size_t) end);
   }
 
 private:
