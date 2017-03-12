@@ -8,24 +8,12 @@
 #include <iostream>
 #include <new>
 #include <mutex>
+#include <cstring>
 
-#if defined(__APPLE__)
-#include <mach-o/getsect.h>
-#endif
-
-extern "C" {
-#if !defined(__APPLE__)
-  extern int __data_start;
-  extern int _end;
-  
-  extern char _etext;
-  extern char _edata;
-#endif
-}
+#include "tprintf.hh"
+#include "os_specific.hh"
 
 using namespace std;
-
-extern void * GCMallocGlobal;
 
 class Header {
 public:
@@ -97,30 +85,12 @@ private:
 
   // Return the start and end of the stack.
   void getStack(void *& start, void *& end) {
-    pthread_t self = pthread_self();
-    auto addr = pthread_get_stackaddr_np(self);
-    auto size = pthread_get_stacksize_np(self);
-    // Assumes stack grows down.
-    start = (void *) ((uintptr_t) addr - size);
-    end = addr;
+    OSSpecific::getStack(start, end);
   }
 
   // Return the start and end of the globals.
   void getGlobals(void *& start, void *& end) {
-    // currently a NOP.
-#if defined(__APPLE__)
-    // Note this is actually deprecated.
-    start = (void *) get_etext();
-    end   = (void *) get_end();
-    if ((uintptr_t) &GCMallocGlobal < (uintptr_t) start) {
-      start = &GCMallocGlobal;
-    } else if ((uintptr_t) &GCMallocGlobal > (uintptr_t) end) {
-      end = &GCMallocGlobal;
-    }
-#else
-    start = (void *) &__data_start;
-    end   = (void *) &_end;
-#endif
+    OSSpecific::getGlobals(start, end);
   }
 
   // Scan through this region of memory looking for pointers to mark.
@@ -185,6 +155,11 @@ private:
 
   // The lists of freed objects, organized by size classes.
   Header * freedObjects[Threshold / Base + 32];
+
+  // Is everything ready? If not, malloc should just request from the
+  // source heap and return that memory.
+  bool initialized;
+  
 };
 
 #endif
