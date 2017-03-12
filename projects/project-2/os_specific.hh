@@ -49,7 +49,13 @@ public:
     }
 #else
     start = (void *) __data_start;
+    if (start == 0) {
+      start = (void *) data_start;
+    }
     end = (void *) _end;
+    if (start == 0) {
+      end = 0;
+    }
 #endif
     if (start > end) {
       auto tmp = start;
