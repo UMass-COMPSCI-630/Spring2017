@@ -14,7 +14,7 @@ ifeq ($(UNAME_S),Darwin)
 all:
 	clang++ $(FLAGS) -c macwrapper.cpp
 	clang++ $(FLAGS) -c driver.cpp
-	clang++ $(FLAGS) driver.cpp testme.cpp -o testme
-	#	clang++ $(FLAGS) -compatibility_version 1 -current_version 1 -dynamiclib -install_name './libgcmalloc.dylib' macwrapper.o driver.o -o libgcmalloc.dylib
-	# clang++ -std=c++14 -g testme.cpp -L. -lgcmalloc -o testme
+	# clang++ $(FLAGS) driver.cpp testme.cpp -o testme
+	clang++ $(FLAGS) -compatibility_version 1 -current_version 1 -dynamiclib -install_name './libgcmalloc.dylib' macwrapper.o driver.o -o libgcmalloc.dylib
+	clang++ -std=c++14 -g testme.cpp -L. -lgcmalloc -o testme
 endif
