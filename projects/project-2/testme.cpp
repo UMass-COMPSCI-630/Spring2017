@@ -1,5 +1,7 @@
 #include <iostream>
+#include <cstring>
 using namespace std;
+
 
 //#include "gcmalloc.hh"
 extern "C"
@@ -16,6 +18,9 @@ int main()
   cout << "-----------" << endl;
   int ** p1 = (int **) malloc(8);
   int * p2 = (int *) malloc(8);
+  char * q = (char *) malloc(256);
+  strcpy(q, "This should be intact.\n");
+  q = q + 4;
   char * p = nullptr;
   cout << "p1 address = " << (size_t) &p1 << ", p2 address = " << (size_t) &p2 << endl;
   cout << "p address = " << (size_t) &p << endl;
@@ -34,5 +39,6 @@ int main()
   }
   cout << **p1 << endl; // should be 12
   cout << p[0] << endl; // should be Y
+  cout << (char *) (q - 4) << endl;
   return 0;
 }
