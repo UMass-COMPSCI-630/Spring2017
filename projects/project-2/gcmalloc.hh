@@ -55,7 +55,8 @@ public:
   ~GCMalloc()
   {
   }
-  
+
+  // Needed for malloc replacement.
   enum { Alignment = 16 };
 
   // Allocate an object of at least the requested size.
@@ -79,21 +80,11 @@ public:
   static size_t getSizeFromClass(int index);
   
   // Return the size class for a given size.
-  static int getSizeClass(size_t sz);
+  static int constexpr getSizeClass(size_t sz);
 
 private:
 
-  // Return the start and end of the stack.
-  void getStack(void *& start, void *& end) {
-    OSSpecific::getStack(start, end);
-  }
-
-  // Return the start and end of the globals.
-  void getGlobals(void *& start, void *& end) {
-    OSSpecific::getGlobals(start, end);
-  }
-
-  // Scan through this region of memory looking for pointers to mark.
+  // Scan through this region of memory looking for pointers to mark (and mark them).
   void scan(void * start, void * end);
   
   // Indicate whether it is time to trigger a garbage collection
@@ -103,12 +94,6 @@ private:
   // (though not too frequently) using the fields below.
   bool triggerGC(size_t szRequested);
 
-  // Track the amount of allocation since the last garbage collection.
-  int bytesAllocatedSinceLastGC;
-
-  // Track the amount of memory freed by the last garbage collection.
-  int bytesReclaimedLastGC;
-  
   // Perform a garbage collection pass.
   void gc();
   
@@ -129,6 +114,15 @@ private:
   // Just returning true is *not* an option :)
   bool isPointer(void * p);
 
+  // Access to OS specific routines to walk stack and globals.
+  OSSpecific sp;
+  
+  // Track the amount of allocation since the last garbage collection.
+  long bytesAllocatedSinceLastGC;
+
+  // Track the amount of memory freed by the last garbage collection.
+  long bytesReclaimedLastGC;
+  
   // The start of the heap (assume it is contiguous).
   void * startHeap;
   
@@ -159,6 +153,57 @@ private:
   // Is everything ready? If not, malloc should just request from the
   // source heap and return that memory.
   bool initialized;
+
+  // Are we currently in a GC? (used to avoid reentrancy issues)
+  bool inGC;
+
+  // After allocating this many bytes, we can trigger a GC (optional).
+  long nextGC;
+  
+  /// Quickly calculate the CEILING of the log (base 2) of the argument.
+#if defined(_WIN32)
+  static inline int log2 (size_t sz) 
+  {
+    int retval;
+    sz = (sz << 1) - 1;
+    __asm {
+      bsr eax, sz
+	mov retval, eax
+	}
+    return retval;
+  }
+#elif defined(__GNUC__) && defined(__i386__)
+  static inline int log2 (size_t sz) 
+  {
+    sz = (sz << 1) - 1;
+    asm ("bsrl %0, %0" : "=r" (sz) : "0" (sz));
+    return (int) sz;
+  }
+#elif defined(__GNUC__) && defined(__x86_64__)
+  static inline int log2 (size_t sz) 
+  {
+    sz = (sz << 1) - 1;
+    asm ("bsrq %0, %0" : "=r" (sz) : "0" (sz));
+    return (int) sz;
+  }
+#elif defined(__GNUC__)
+  // Just use the intrinsic.
+  static inline constexpr int log2 (size_t sz) 
+  {
+    sz = (sz << 1) - 1;
+    return (sizeof(unsigned long) * 8) - __builtin_clzl(sz) - 1;
+  }
+#else
+  static inline int log2 (size_t v) {
+    int log = 0;
+    unsigned int value = 1;
+    while (value < v) {
+      value <<= 1;
+      log++;
+    }
+    return log;
+  }
+#endif
   
 };
 
