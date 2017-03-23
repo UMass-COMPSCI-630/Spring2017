@@ -186,10 +186,11 @@ private:
 
   // Get the range of the stack.
   static void getStack(void *& start, void *& end) {
+    volatile int q;
 #if !defined(__APPLE__)
     unsigned long kstkesp, startstack;
     readStat(kstkesp, startstack);
-    start = (void *) kstkesp;
+    start = (void *) &q; // kstkesp;
     end   = (void *) startstack;
 #else
     static pthread_t self = pthread_self();
