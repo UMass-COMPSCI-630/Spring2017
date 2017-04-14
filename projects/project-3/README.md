@@ -6,11 +6,9 @@ implements the memcached protocol in C++11.  Due date is May 8.
 What is memcached? See http://memcached.org/ and
 http://en.wikipedia.org/wiki/Memcached.
 
-Basically, it is a glorified in-memory hash table that uses consistent
-hashing (see http://en.wikipedia.org/wiki/Consistent_hashing and
-http://dl.acm.org/citation.cfm?id=258660). You can store values with a
-given key, and then retrieve the value later using that key. However, the
-value may have been evicted from memory.
+Basically, it is a glorified in-memory hash table. You can store
+values with a given key, and then retrieve the value later using that
+key. However, the value may have been evicted from memory.
 
 Your group should all work together to write all of the code in your
 system; however, you are free (and welcome) to discuss issues like the
