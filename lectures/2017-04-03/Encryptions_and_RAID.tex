@@ -1,0 +1,167 @@
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+\usepackage{graphicx}
+\usepackage{url}
+
+%
+% The following commands sets up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+\newcommand{\dnl}{\mbox{}\par}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+  \pagestyle{myheadings}
+  \thispagestyle{plain}
+  \newpage
+  \setcounter{lecnum}{#1}
+  \setcounter{page}{1}
+  \noindent
+  \begin{center}
+  \framebox{
+     \vbox{\vspace{2mm}
+   \hbox to 6.28in { {\bf COMPSCI~630~~~Systems
+                       \hfill Spring 2017} }
+      \vspace{4mm}
+      \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+      \vspace{2mm}
+      \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe(s): #4} }
+     \vspace{2mm}}
+  }
+  \end{center}
+  \markboth{Lecture {#1}: #2}{Lecture {#1}: #2}
+  \vspace*{4mm}
+}
+
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+%
+\renewcommand{\cite}[1]{[#1]}
+
+% \input{epsf}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{FIGURE-SIZE}{CAPTION}{FILENAME}
+\newcommand{\fig}[4]{
+           \vspace{0.2 in}
+           \setlength{\epsfxsize}{#2}
+           \centerline{\epsfbox{#4}}
+           \begin{center}
+           Figure \thelecnum.#1:~#3
+           \end{center}
+   }
+
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% Some useful equation alignment commands, borrowed from TeX
+\makeatletter
+\def\eqalign#1{\,\vcenter{\openup\jot\m@th
+ \ialign{\strut\hfil$\displaystyle{##}$&$\displaystyle{{}##}$\hfil
+     \crcr#1\crcr}}\,}
+\def\eqalignno#1{\displ@y \tabskip\@centering
+ \halign to\displaywidth{\hfil$\displaystyle{##}$\tabskip\z@skip
+   &$\displaystyle{{}##}$\hfil\tabskip\@centering
+   &\llap{$##$}\tabskip\z@skip\crcr
+   #1\crcr}}
+\def\leqalignno#1{\displ@y \tabskip\@centering
+ \halign to\displaywidth{\hfil$\displaystyle{##}$\tabskip\z@skip
+   &$\displaystyle{{}##}$\hfil\tabskip\@centering
+   &\kern-\displaywidth\rlap{$##$}\tabskip\displaywidth\crcr
+   #1\crcr}}
+\makeatother
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+
+
+% Some general latex examples and examples making use of the
+% macros follow.
+
+\begin{document}
+
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{11}{Encryptions \& RAID}{Emery Berger}{Tsung-Yu Lin, Anirudha Desai}
+
+\section{Encryptions}
+
+A typical scenario used in encryption: Alice communicates with Bob through Internet. There are other people present in the middle of message passing: Eve sits and listens to the messages between Alice and Bob; Mallory, a malicious attacker, tries to modify and interrupt the messages. An approach to avoid the messages being acquired by Eve is using encryption. Messages are encrypted and keys are used to decode the messages.
+
+\subsection{Symmetric key encryption}
+Symmetric key encryption uses the same key as shared secret at both sides of encoding and decoding. Imagine Alice communicate plain text with Bob. They want to encode the text so that even Eve intercepts the message, he cannot read the encoded message.
+
+\paragraph{Rot13} Cipher using Rot13 is an example of symmetric key encryption. The transformation simply encodes messages by shifting alphabets (Transposition cipher).  Figure~\ref{f:ciphar} (a) gives an example. There are only 26 possible mappings and thus it  is easy for Eve to decode it by trying all possibilities. ENIGMA is an example of Cipher machine. 
+
+\paragraph{Substitution cipher} Better than Rot13, substitution cipher encodes the text by replacing each alphabet with another without preserving the order.  Figure~\ref{f:ciphar} (b) gives an example. There are factorial of 26 possible such mappings and it is difficult to break by exhaustive search. However, given that the frequency of alphabets is not distributed uniformly, for example, "e" is most common and "z" is rare in English, people who intercept the message can decode the message by \emph{frequency analysis} to recover the mapping. Additional information using bigram, for example, "t" and "o" very likely appear together, makes the frequency analysis easier.
+
+\paragraph{One-time pad} One-time pad cipher has position independent random substitution cipher for each character. When Eve observes the encoded text, each alphabets appear equally likely, so that the cipher is secure. But the drawback with this is that it does not scale well. For example, in the case of submarines where frequent communication is not possible, randomly choosing a cipher will not be feasible.
+
+\begin{figure}[h]
+\begin{center}
+\begin{tabular}{c|c}
+  \includegraphics[width=0.3\linewidth]{Rot13.png} &
+  \includegraphics[width=0.3\linewidth]{SubstitutionCiphar.png} \\
+  (a) &
+  (b) \\
+\end{tabular}
+\end{center}
+\caption{\label{f:ciphar}(a) Rot13 cipher (b) Substitution cipher}
+\end{figure}
+
+\subsection{Asymmetric key encryption}
+Public key encryption use a pair of keys: public key known to everyone, and private key known only to the recipient of the message. Alice encodes the message using public key and Bod decodes the message using his private key. The asymmetric key approach relies on one-way functions where computing the inverse of the function is hard. The commonly used one-way function is the multiplication of two large prime numbers. The reverse direction is to compute prime factorization which is not easy to achieve for large numbers.
+Reference is made about Diffie-Helman key exchange algorithm for symmetric key exchange and about RSA Algorithm for asymmetric key exchange. 
+\subsection{Dealing with mallory problem}
+To deal with mallory problem, a common approach is to create a separate document to verify the encoded document is not forged. The document is referred as digest which can be generated by a hash function, for example md5sum. The recipient can take the received message and compute the output of hash function to the digest. It is almost impossible to have forged document matched to the digest. Digest needs to be elsewhere otherwise Mallory can forge the digest. 
+
+\section{RAID}
+\subsection{Hard drive disk}
+The structure of HDD is shown as Figure~\ref{f:hdd}. A head is attached on the arm reading the data from disk. The head can move along the arm inward or outward to read data from different tracks (seek latency) and the disk can rotate such that the sector with required data is under the head (rotation latency). Due to these two operations, the latency of HDD is high. To reduce the latency, file system tries to put files in consecutive blocks. Comparing solid state drive (SSD) to HDD, SSD has the same throughput but has no seek and rotation latency. Because there is no moving part in SSD, SSD generate less heat and is widely used nowadays.
+
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{hdd.jpg}
+\caption{\label{f:hdd}Example of a Hard drive disk}
+\end{figure}
+
+
+\subsection{Redundant array of independent disks}
+
+\paragraph{RAID 0} It is also known as striping. It breaks up the data and separates them across several disk drives to achieve parallelism for speedup. Data can remain intact only when the data on all disks are not corrupted. This approach sacrifices the robustness to enhance the performance.
+
+\paragraph{RAID 1} Mirroring: replicating the data to enhance the durability.
+
+\paragraph{RAID 2} Using Hamming code for error correction.
+
+\paragraph{Problem of RAID} RAID is great until it fails. Generally, people are still using tapes for backup. To restore the data from failure, RAID needs to copy the whole disk form one to another. Copying a whole disk is almost 100\% to fail. The is the reason why rebuilding RAID usually takes forever. On the other hand, the assumption of independent failure rate of disks is not valid. Because the array of disks are usually on the same racks, use the same power supplies, under same temperature, and purchased at the same time, if one of them fails, the others are likely to fail as well.
+
+\end{document}
