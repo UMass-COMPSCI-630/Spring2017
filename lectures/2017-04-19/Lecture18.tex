@@ -1,0 +1,199 @@
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{amsmath}
+%\usepackage{chngcntr}
+%\counterwithin{figure}{subsection}
+
+%
+% The following commands sets up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+\renewcommand{\theequation}{\thesubsection.\arabic{equation}}
+\renewcommand{\thefigure}{\thesubsection.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+\newcommand{\dnl}{\mbox{}\par}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+  \pagestyle{myheadings}
+  \thispagestyle{plain}
+  \newpage
+  \setcounter{lecnum}{#1}
+  \setcounter{page}{1}
+  \noindent
+  \begin{center}
+  \framebox{
+     \vbox{\vspace{2mm}
+   \hbox to 6.28in { {\bf CMPSCI~630~~~Systems
+                       \hfill Spring 2017} }
+      \vspace{4mm}
+      \hbox to 6.28in { {\Large \hfill Lecture #1  \hfill} }
+%       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+      \vspace{2mm}
+      \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+     \vspace{2mm}}
+  }
+  \end{center}
+  \markboth{Lecture #1: #2}{Lecture #1: #2}
+  \vspace*{4mm}
+}
+
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+%
+\renewcommand{\cite}[1]{[#1]}
+
+% \input{epsf}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{FIGURE-SIZE}{CAPTION}{FILENAME}
+\newcommand{\fig}[4]{
+           \vspace{0.2 in}
+           \setlength{\epsfxsize}{#2}
+           \centerline{\epsfbox{#4}}
+           \begin{center}
+           Figure \thelecnum.#1:~#3
+           \end{center}
+   }
+
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% Some useful equation alignment commands, borrowed from TeX
+\makeatletter
+\def\eqalign#1{\,\vcenter{\openup\jot\m@th
+ \ialign{\strut\hfil$\displaystyle{##}$&$\displaystyle{{}##}$\hfil
+     \crcr#1\crcr}}\,}
+\def\eqalignno#1{\displ@y \tabskip\@centering
+ \halign to\displaywidth{\hfil$\displaystyle{##}$\tabskip\z@skip
+   &$\displaystyle{{}##}$\hfil\tabskip\@centering
+   &\llap{$##$}\tabskip\z@skip\crcr
+   #1\crcr}}
+\def\leqalignno#1{\displ@y \tabskip\@centering
+ \halign to\displaywidth{\hfil$\displaystyle{##}$\tabskip\z@skip
+   &$\displaystyle{{}##}$\hfil\tabskip\@centering
+   &\kern-\displaywidth\rlap{$##$}\tabskip\displaywidth\crcr
+   #1\crcr}}
+\makeatother
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+% Some general latex examples and examples making use of the
+% macros follow.
+
+\begin{document}
+
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{18}{April 18}{Emery Berger}{Andrew Danise, Arjun Sreedharan}
+
+\section{Databases}
+
+\subsection{History}
+
+Early Databases were very primitive and did not have simple querying capabilities.
+CODASYL exposes an API for general purpose programming languages.
+Lookups were done using a minimal abstraction built using iterators via a cursor.
+It maintained an index made up of a bunch of pointers to data records.
+
+The development of SQL (Structured Query Language) started out at IBM.
+It was preceded by a language named Quel which was based on tuples.
+IBM's Database research in the early stages followed 2 approaches
+to building querying capability:
+
+\begin{description}
+  \item[$\bullet$ SQL]
+  \item[$\bullet$ QBE] (Query By Example): QBE is a visual way of expressing queries.
+      The graphical queries would look similar to ASCII art. QBE is very easy for
+        untrained users to understand, but it is difficult to express complex queries.
+\end{description}
+
+\subsection{Structure}
+
+Databases use B-Tree or B\texttt{+} Tree data structures. B-tree is a
+generalization of a Binary Search Tree where each node can have multiple children.
+B-trees are used to implement database indices. They maximize locality when
+searching for a particular key. B-trees are very efficient when represented
+on disk. Size of a B-tree node is typically a 4K page.
+
+Unlike B-tree, B\texttt{+} trees don't have data associated with interior nodes and more keys fit on a page of memory.
+
+\subsection{Partitioning}
+
+\subsubsection{Range Partitioning}
+In Range partitioning, data is partitions based on the range of
+values of a particular key. For example, if \textit{Name}
+is the partitioning key, all entries will with name
+beginning in letter from A to J can be in one partition,
+those beginning with K to P in another and the rest in
+the third. This gives a good speedup if the queries can
+be parallely executed in the different partitions.
+The size of partitions may not be equal.
+
+\subsection{Hash Partition}
+Hash Partitioning is based on a hashing algorithm
+that is applied to the partitioning key. The hashing
+function evenly spreads the entries among partitions,
+giving partitions approximately the same size. It is
+ideal for balancing data storage evenly across machines or replicas.
+
+There are also other methods for partitioning
+like Horizontal and Vertical partitioning (sharding).
+In Horizontal partitioning, entries in the database are
+divided into different partitions. In Vertical Partitioning, the
+fields of the entries are divided into different partitions.
+
+\section{Query Optimization}
+
+Sometimes the order in which the query is executed
+has a drastic impact on the performance of the query.
+In addition, sometimes the database can optimize queries
+because it knows about some inherent properties of the data.
+For example, if you run the the SQL query "select * from DB where salary > 10000 and name == "John"
+at a company where everyone makes more than 10000 it will need to lookup all of the data. However,
+if the database reorganized the query to first check if the name == John than the results would be
+more limited. In order to perform such optimizations, databases store statistics on the type
+of data they hold. They use this data to reorganize queries to achieve the best possible performance.
+This is called Selectivity.
+
+\section{MapReduce}
+
+Databases are great for storing structured data. But they
+do not scale well when unstructured on semi-structured data
+is stored. Assume that an organization has to store many HTML
+or XML documents. The overhead of query optimizer and other
+management overhead for databases makes its scalability very
+limited. This is where a restricted model of distributed
+computing named MapReduce comes into the picture. MapReduce
+is highly scalable with unstructured documents. MapReduce
+works on the basis of \textit{map} and \textit{reduce} methods
+provided by the user. It provides in-built fault tolerance,
+and at every stage writes data to disk.
+
+\end{document}
