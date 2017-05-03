@@ -158,6 +158,22 @@ establishing a total order on these events.
 
 Consider the following example.
 
+\begin{center}
+    \includegraphics[scale=.75]{example1.pdf}
+\end{center}
+
+In this example, two processes ($P_0$ and $P_1$) operate on a shared variable $x$.
+Each process maintains a vector clock of size 2 (since there are two processes)
+intialized to $[0|0]$. After operation $x=1$ in $P_0$, its vector clock is
+updated to $[1|0]$ and at this point $P_1$ takes over execution. $P_0$ passes
+its vector clock $[1|0]$ to $P_1$. Before $P_1$ executes any instructions, it
+compares its vector clock $[0|0]$ against $P_0$'s vector clock $[1|0]$. As the
+entry in $P_1$'s vector clock for $P_0$ is less than or equal to the entry of
+$P_0$ in its vector clock (i.e. $0\le1$), there is no race condition. In
+general, if there does not exist a happens-before relation between two events
+there could be a potential race. Logical and vector clocks detect such race
+conditions.
+
 \subsection{Race Detection}
 The happens-before relation can be used to detect potential race conditions in
 variable accesses and modifications. Vector clocks encode this relationship, so
@@ -175,10 +191,29 @@ To address the performance overhead of vector clocks, some techniques sacrifice
 precision. ERASER is a Java race detector that uses such an approach, employing
 a \emph{LockSet} analysis algorithm to detect potential races (potentially
 giving false-positives). The key insight here is that if multiple processes work
-on a shared variable without holding a lock, then there is a potential race.
-Note that if programs use alternative means of establishing ordering (rather
-than locking primitives), LockSet cannot detect that they may remain mutually
-exclusive.
+on a shared variable without holding a lock, then there is a potential race. As
+an example, consider the two processes below:
+
+\begin{center}
+    \includegraphics[scale=.75]{example2.pdf}
+\end{center}
+
+Initially, we consider the LockSets for each process to be empty (i.e. $LS(P_0)
+= LS(P_1) = \emptyset$). After $P_0$ and $P_1$ acquire the locks $l$ and $m$
+respectively, the lock-sets for the variable assignment on each process will be
+$LS(P_0) = \{l\}$ and $LS(P_1) = \{m\}$. Since $LS(P_0)\cap LS(P_1) =
+\emptyset$, there is a potential race condition. In general, the LockSet
+analysis reports a potential race whenever the intersection is empty.
+
+Why is this a \emph{potential} race?
+\begin{enumerate}
+    \item The race could be benign, if for instance both threads assign the same
+        value to $x$.
+    \item Note that if programs use alternative means of establishing ordering
+        (rather than locking primitives), LockSet cannot detect that they may
+        remain mutually exclusive.
+\end{enumerate}
+
 
 \subsection{FastTrack - Prof. Stephen Freund Guest Lecturer}
 FastTrack gives the precision of vector clocks without the space/time overhead
@@ -190,6 +225,31 @@ FastTrack replaces linear-sized vector clocks with an \emph{epoch} encoding the
 thread id and counter of the last write to a variable. This preserves the
 happens-before relation before any races have occured, so FastTrack guarantees
 that it will precisely detect at least the first race to occur on a variable.
+
+\subsection{Improving Upon FastTrack}
+How can we perform better? We could:
+\begin{enumerate}
+    \item Sample windows for potential races instead of every variable access.
+        This has the downside of not being precise.
+    \item Use LockSet analysis until you would report a potential race, then
+        switch to FastTrack to verify it is not a false positive. Results were
+        not as promising as one might hope.
+    \item Reduce redundancy in consistency checks. This approach is taken in
+        \emph{RedCard}. If a variable is accessed multiple times inside a locked
+        critical section that respects the happens-before relation, we can
+        perform just a single check instead of checking at each access. Static
+        analysis can be used to improve a dynamic detector by recognizing these
+        cases.
+    \item Looping over an entire array checks accesses to every element in the
+        array. If all your program ever does is loop over the entire array, a
+        single check can be performed on the array itself, instead of requiring
+        checks on every element within it. This involves recognizing access
+        patterns and optimizing shadow representations of the happens-before
+        relation.
+    \item Don't perform the check exactly when the access occurs. This can do
+        things like hoist a check out of a loop so it's only done once instead
+        of linearly in the number of the iterations.
+\end{enumerate}
 
 
 
